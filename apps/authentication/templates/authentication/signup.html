@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+{% block content %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TaskFlow</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500&family=DM+Serif+Display&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'DM Sans', sans-serif; }
+    .brand { font-family: 'DM Serif Display', serif; }
+  </style>
+</head>
+<body class="min-h-screen bg-gray-100 flex items-center justify-center px-4 py-10">
+
+  <div class="bg-white border border-gray-200 rounded-xl shadow-sm w-full max-w-md px-8 py-10">
+
+    <h1 class="brand text-3xl text-gray-900 mb-1">TaskFlow</h1>
+    <p class="text-sm text-gray-500 mb-8">Create your account to get started</p>
+
+    <form method="POST" action="{% url 'signup' %}" id="signupForm">
+      {% csrf_token %}
+      {{ form.non_field_errors }}
+
+      <div class="mb-5">
+        <label for="email" class="block text-xs font-medium text-gray-500 uppercase tracking-widest mb-1.5">Email</label>
+        <input
+          type="email"
+          id="email"
+          name="email"
+          value="{{ form.email.value|default:'' }}"
+          placeholder="you@example.com"
+          required
+          class="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:border-gray-400 transition"
+        />
+        {% if form.email.errors %}
+        <p id="emailError" class="text-xs text-red-500 mt-1.5">
+            {{ form.email.errors.0 }}
+        </p>
+        {% endif %}
+      </div>
+
+      <div class="mb-5">
+        <label for="pwd" class="block text-xs font-medium text-gray-500 uppercase tracking-widest mb-1.5">Password</label>
+        <input
+          type="password"
+          id="pwd"
+          name="password"
+          placeholder="Min. 6 characters"
+          required
+          class="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:border-gray-400 transition"
+        />
+        {% if form.password.errors %}
+        <p id="passwordError" class="text-xs text-red-500 mt-1.5">
+            {{ form.password.errors.0}}
+        </p>
+        {% endif %}
+      </div>
+
+      <div class="mb-6">
+        <label for="cpwd" class="block text-xs font-medium text-gray-500 uppercase tracking-widest mb-1.5">Confirm Password</label>
+        <input
+          type="password"
+          id="cpwd"
+          name="confirm_password"
+          placeholder="Repeat your password"
+          required
+          oninput="checkMatch()"
+          class="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:border-gray-400 transition"
+        />
+        <p id="matchMsg" class="text-xs text-red-500 mt-1.5 hidden">Passwords do not match</p>
+        {% if form.confirm_password.errors %}
+        <p id="confirmPasswordError" class="text-xs text-red-500 mt-1.5">
+            {{ form.confirm_password.errors.0 }}
+        </p>
+        {% endif %}
+      </div>
+
+      <button
+        type="submit"
+        id="submitBtn"
+        class="w-full bg-gray-900 hover:bg-gray-700 text-white text-sm font-medium rounded-lg py-2.5 transition disabled:opacity-40 disabled:cursor-not-allowed"
+      >
+        Create account
+      </button>
+    </form>
+
+    <p class="text-center text-xs text-gray-400 mt-6">Already have an account?
+      <a href="#" class="text-gray-900 font-medium hover:underline">Sign in</a>
+    </p>
+
+  </div>
+
+  <script>
+    function checkMatch() {
+      const pwd = document.getElementById('pwd').value;
+      const cpwd = document.getElementById('cpwd').value;
+      const msg = document.getElementById('matchMsg');
+      const btn = document.getElementById('submitBtn');
+      const input = document.getElementById('cpwd');
+
+      if (cpwd.length > 0 && pwd !== cpwd) {
+        msg.classList.remove('hidden');
+        input.classList.add('border-red-400');
+        input.classList.remove('border-gray-200');
+        btn.disabled = true;
+      } else {
+        msg.classList.add('hidden');
+        input.classList.remove('border-red-400');
+        input.classList.add('border-gray-200');
+        btn.disabled = false;
+      }
+    }
+
+    function clearError(inputId, errorId){
+        const input = document.getElementById(inputId);
+        const error = document.getElementById(errorId);
+
+        if (input && error){
+            input.addEventListener('input', ()=>{
+                error.style.display = 'none';
+                input.classList.remove('border-red-400')
+            })
+        }
+    }
+    clearError('email', 'emailError');
+    clearError('pwd', 'passwordError');
+    clearError('cpwd', 'confirmPasswordError');
+  </script>
+
+</body>
+</html>
+
+{% endblock %}

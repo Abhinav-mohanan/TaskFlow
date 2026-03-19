@@ -1,0 +1,23 @@
+<body>
+  {% block content %}{% endblock %}
+
+  <script>
+    document.addEventListener('submit', function(e) {
+      const form = e.target;
+
+      if (form.tagName === 'FORM') {
+        const btn = form.querySelector('button[type="submit"]');
+
+        if (btn) {
+          btn.disabled = true;
+
+          const text = btn.querySelector('.btn-text');
+          const loader = btn.querySelector('.btn-loader');
+
+          if (text) text.textContent = 'Loading...';
+          if (loader) loader.classList.remove('hidden');
+        }
+      }
+    });
+  </script>
+</body>
