@@ -1,6 +1,10 @@
 from django.urls import reverse_lazy
 from django.views.generic import CreateView
-from .models import CustomUser
+from django.views import View
+from django.contrib import messages
+from django.contrib.auth import login
+from django.shortcuts import render, redirect
+from .models import CustomUser, EmailOTP
 from .forms import SignupForm
 from .utils import send_otp_mail
 
@@ -11,10 +15,90 @@ class SignupView(CreateView):
     success_url = reverse_lazy('verify_signup_otp')
 
     def form_valid(self, form):
-
         user = form.save()
 
         send_otp_mail(user=user, purpose='signup')
         self.request.session['signup_email'] = user.email
         
         return super().form_valid(form)
+
+
+class VerifySignupOTP(View):
+    def get(self, request):
+        email = request.session.get('signup_email')
+
+        if not email:
+            return redirect('signup')
+        
+        context = {
+            'email': email,
+            'title': 'Verify Your Account',
+            'message': f"We sent a OTP to {email}.",
+            'post_url': 'verify_signup_otp',
+        }
+        return render(request, 'authentication/verify_otp.html', context)
+    
+    def post(self, request):
+        email = request.session.get('signup_email')
+        entered_otp = request.POST.get('otp')
+
+        if not email or not entered_otp:
+            return redirect('signup')
+        
+        try:
+            user = CustomUser.objects.get(email=email)
+            otp_record = EmailOTP.objects.get(user=user)
+            
+            if str(otp_record.otp) == entered_otp:
+
+                if otp_record.is_expired():
+                    messages.error(request, "This code has expired. Please request a new one.")
+                    return redirect('verify_signup_otp')
+
+                user.is_active = True
+                user.save()
+                otp_record.delete()
+
+                login(request, user)
+                del request.session['signup_email']
+                return redirect('home')
+            else:
+                messages.error(request, "Invalid OTP code. Please try again.")
+                return redirect('verify_signup_otp')
+            
+        except (CustomUser.DoesNotExist, EmailOTP.DoesNotExist):
+            messages.error(request, "An error occurred. Please try again.")
+            return redirect('signup')
+
+class ResendOTPView(View):
+    def post(self, request):
+        email = request.session.get('signup_email')
+        
+        if not email:
+            email = request.session.get('login_email')
+            purpose = 'login'
+        else:
+            purpose = 'signup'
+        
+        if not email:
+            messages.error(request, "An error occurred. Please try again.")
+            return redirect('login')
+        
+        try:
+            user = CustomUser.objects.get(email=email)
+            send_otp_mail(user, purpose)
+
+            messages.success(request, f"A new OTP has been sent to {email}.")
+
+            if purpose == 'signup':
+                return redirect('verify_signup_otp')
+            else:
+                return redirect('verify_login_otp')
+        
+        except CustomUser.DoesNotExist:
+            messages.error(request, "User not found. Please try again.")
+            return redirect('signup')
+
+
+
+        
