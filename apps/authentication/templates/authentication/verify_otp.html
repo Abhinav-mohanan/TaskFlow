@@ -1,17 +1,5 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TaskFlow</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500&family=DM+Serif+Display&display=swap" rel="stylesheet">
-  <style>
-    body { font-family: 'DM Sans', sans-serif; }
-    .brand { font-family: 'DM Serif Display', serif; }
-  </style>
-</head>
-<body class="min-h-screen bg-gray-100 flex items-center justify-center px-4 py-10">
+{% extends "base.html" %}
+{% block content %}
 
   <div class="bg-white border border-gray-200 rounded-xl shadow-sm w-full max-w-md px-8 py-10">
 
@@ -79,7 +67,9 @@
     </div>
 
   </div>
+  {% endblock %}
 
+  {% block extra_scripts %}
   <script>
     function handleOtp(input) {
       const val = input.value;
@@ -104,5 +94,4 @@
     }
   </script>
 
-</body>
-</html>
+{% endblock %}
