@@ -1,8 +1,8 @@
 from django.urls import reverse_lazy
-from django.views.generic import CreateView
+from django.views.generic import CreateView, TemplateView
 from django.views import View
 from django.contrib import messages
-from django.contrib.auth import login
+from django.contrib.auth import login, authenticate
 from django.shortcuts import render, redirect
 from .models import CustomUser, EmailOTP
 from .forms import SignupForm
@@ -101,4 +101,110 @@ class ResendOTPView(View):
 
 
 
+class LoginView(View):
+    def get(self, request):
+        return render(request, 'authentication/login.html')
+    
+    def post(self, request):
+        email = request.POST.get('username')
+        password = request.POST.get('password')
+        action = request.POST.get('action')
+        print(f'{action=}, {password=}, {email=}')
+
+        if not email:
+            messages.error(request, "Please enter your email address.")
+            return redirect('login')
         
+        try:
+            user = CustomUser.objects.get(email=email)
+
+            if not user.is_active:
+                send_otp_mail(user, purpose='signup')
+                request.session['signup_email'] = user.email
+                messages.warning(request, "Please verify your account first. We've sent a code to your email.")
+                return redirect('verify_signup_otp')
+            
+            if action == 'otp':
+                send_otp_mail(user, purpose='login')
+                request.session['login_email'] = user.email
+                messages.success(request, "A login code has been sent to your email.")
+                return redirect('verify_login_otp')
+            
+            elif action == 'password':
+                if not password:
+                    messages.error(request, "Please enter your password")
+                    return redirect('login')
+                
+                auth_user = authenticate(request, email=email, password=password)
+
+                if auth_user is not None:
+                    login(request, auth_user)
+                    return redirect('home')
+                else:
+                    messages.error( request, "Incorrect password. Please try again.")
+                    return redirect('login')
+            else:
+                messages.error(request, "Invalid request. Please try again.")
+                return redirect('login')
+                
+        except CustomUser.DoesNotExist:
+            messages.error(request, "Invalid credentials or account does not exist.")
+            return redirect('login')
+
+
+class VerifyLoginOTPView(View):
+
+    def get(self, request):
+        email = request.session.get('login_email')
+
+        if not email:
+            return redirect('login')
+        
+        context = {
+            'email': email,
+            'title': 'Login to Your Account',
+            'message': f"We sent a OTP to {email}.",
+            'post_url': 'verify_login_otp',
+        }
+        return render(request, 'authentication/verify_otp.html', context)
+    
+    def post(self, request):
+        email = request.session.get('login_email')
+        entered_otp = request.POST.get('otp')
+
+        if not email:
+            return redirect('login')
+
+        try:
+            user = CustomUser.objects.get(email=email)
+            otp_record = EmailOTP.objects.get(user=user)
+
+            if str(otp_record.otp) == entered_otp:
+                if otp_record.is_expired():
+                    messages.error(request, "OTP expiry please request a new one")
+                    return redirect('verify_login_otp')
+                if not user.is_active:
+                        user.is_active = True
+                        user.save()
+                otp_record.delete()
+                del request.session['login_email']
+                login(request, user)
+                return redirect('home')
+            else:
+                messages.error(request, "Invalid OTP")
+                return redirect('verify_login_otp')
+
+        except (CustomUser.DoesNotExist, EmailOTP.DoesNotExist):
+            messages.error(request, "An error occurred. Please try again.")
+            return redirect('signup')
+
+
+class HomeView(TemplateView):
+    template_name = 'authentication/home.html'
+                
+                
+
+
+                
+            
+            

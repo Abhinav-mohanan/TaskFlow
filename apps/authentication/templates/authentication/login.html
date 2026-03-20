@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="bg-white border border-gray-200 rounded-xl shadow-sm w-full max-w-md px-8 py-10">
+
+  <h1 class="brand text-3xl text-gray-900 mb-1">Welcome back</h1>
+  <p class="text-sm text-gray-500 mb-8">Log in to your TaskFlow account</p>
+
+  {% if form.non_field_errors %}
+    <div class="bg-red-50 border-l-4 border-red-400 px-4 py-3 rounded-lg mb-5">
+      <p class="text-xs text-red-600">{{ form.non_field_errors.0 }}</p>
+    </div>
+  {% endif %}
+
+  {% if messages %}
+    {% for message in messages %}
+      <div class="px-4 py-3 rounded-lg mb-5 border-l-4
+        {% if message.tags == 'error' %} bg-red-50 border-red-400
+        {% elif message.tags == 'warning' %} bg-yellow-50 border-yellow-400
+        {% else %} bg-blue-50 border-blue-400 {% endif %}">
+        <p class="text-xs
+          {% if message.tags == 'error' %} text-red-600
+          {% elif message.tags == 'warning' %} text-yellow-600
+          {% else %} text-blue-600 {% endif %}">
+          {{ message }}
+        </p>
+      </div>
+    {% endfor %}
+  {% endif %}
+
+  <form method="POST" action="{% url 'login' %}">
+    {% csrf_token %}
+
+    <input type="hidden" name="action" id="hidden_action" value="password">
+
+    <div class="mb-5">
+      <label for="username" class="block text-xs font-medium text-gray-500 uppercase tracking-widest mb-1.5">
+        Email Address</label>
+      <input type="email" id="email" value="{{ form.email.value|default:'' }}" name="username" placeholder="you@example.com" required
+        class="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-900 
+        placeholder-gray-400 focus:outline-none focus:border-gray-400 transition" />
+      <p id="email_msg" class="text-xs text-red-500 mt-1.5 hidden">Email is required</p>
+    </div>
+
+    <div class="mb-6">
+      <div class="flex items-center justify-between mb-1.5">
+        <label for="password" class="block text-xs font-medium text-gray-500 uppercase tracking-widest">
+          Password</label>
+      </div>
+      <input type="password" id="password" name="password" placeholder="••••••••" required
+        class="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-900 
+        placeholder-gray-400 focus:outline-none focus:border-gray-400 transition" />
+      <p id="pwd_msg" class="text-xs text-red-500 mt-1.5 hidden">Password must be 6 char long</p>
+    </div>
+
+    <button id="login_btn" type="submit" disabled
+      onclick="document.getElementById('hidden_action').value='password';"
+      class="w-full bg-gray-900 hover:bg-gray-700 text-white text-sm font-medium rounded-lg py-2.5 
+      transition disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 mb-6">
+      <span class="btn-text">Log in</span>
+    </button>
+
+    <div class="flex items-center mb-6">
+      <div class="flex-grow border-t border-gray-200"></div>
+      <span class="px-4 text-xs text-gray-400 font-medium">OR</span>
+      <div class="flex-grow border-t border-gray-200"></div>
+    </div>
+
+    <button id="otp_btn" type="submit" formnovalidate disabled
+       onclick="document.getElementById('hidden_action').value='otp';"
+       class="flex items-center justify-center w-full bg-gray-50 border border-gray-200 hover:border-gray-400 
+       hover:bg-white text-black text-sm font-medium disabled:opacity-40 disabled:cursor-not-allowed rounded-lg py-2.5 px-4 transition gap-2">
+      <svg class="w-4 h-4 text-black shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+      </svg>
+      Log in with email code
+    </button>
+  </form>
+
+  <p class="text-center text-xs text-gray-400 mt-6">
+    Don't have an account?
+    <a href="{% url 'signup' %}" class="text-gray-900 font-medium hover:underline">Sign up</a>
+  </p>
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  function checkValidation () {
+    const email = document.getElementById('email').value.trim();
+    const pwd = document.getElementById('password').value;
+
+    const loginBtn = document.getElementById('login_btn');
+    const otpBtn = document.getElementById('otp_btn')
+
+    const email_msg = document.getElementById('email_msg')
+    const pwd_msg = document.getElementById('pwd_msg')
+
+    loginBtn.disabled = true
+    otpBtn.disabled = true
+
+    if (email.length === 0){
+      email_msg.classList.remove('hidden')
+      pwd_msg.classList.add('hidden')
+      return 
+    } else{
+      email_msg.classList.add('hidden')
+      otpBtn.disabled = false
+    }
+
+    if (pwd.length === 0){
+      pwd_msg.classList.add('hidden')
+      return
+    }
+
+    if (pwd.length > 0 && pwd.length < 6){
+      pwd_msg.classList.remove('hidden')
+      return
+    }else{
+      pwd_msg.classList.add('hidden')
+      loginBtn.disabled = false
+    }
+  }
+  document.getElementById('email').addEventListener('input', checkValidation);
+  document.getElementById('password').addEventListener('input', checkValidation);
+
+</script>
+{% endblock %}
