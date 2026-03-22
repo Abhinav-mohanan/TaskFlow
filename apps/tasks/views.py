@@ -9,6 +9,7 @@ from datetime import date
 from django.db.models import Q
 from .models import Task
 from .forms import TaskForm
+import calendar
 
 
 class DashboardView(LoginRequiredMixin, TemplateView):
@@ -133,3 +134,96 @@ class TaskToggleView(LoginRequiredMixin, View):
             or 'dashboard'
         )
         return redirect(next_url)
+
+
+class TaskCalendarView(LoginRequiredMixin, TemplateView):
+    template_name = 'tasks/task_calendar.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        today = date.today()
+        year = self.request.GET.get('year')
+        month = self.request.GET.get('month')
+
+        try:
+            year = int(year) if year else today.year
+            month = int(month) if month else today.month
+        except ValueError:
+            year = today.year
+            month = today.month
+
+    
+        month_name = calendar.month_name[month]
+        day_names = list(calendar.day_abbr)
+
+        if month == 1:
+            prev_month = 12
+            prev_year = year - 1
+        else:
+            prev_month = month - 1
+            prev_year = year
+
+        if month == 12:
+            next_month = 1
+            next_year = year + 1
+        else:
+            next_month = month + 1
+            next_year = year
+            
+        selected_date_str = self.request.GET.get('date')
+
+        selected_date = None
+        selected_day_tasks = []
+
+        if selected_date_str:
+            try:
+                selected_date = date.fromisoformat(selected_date_str)
+                selected_day_tasks = Task.objects.filter(
+                    user=self.request.user,
+                    due_date=selected_date
+                ).order_by('due_time')
+            except ValueError:
+                pass
+
+        month_tasks = Task.objects.filter(
+            user=self.request.user,
+            due_date__year=year,
+            due_date__month=month,
+        ).values_list('due_date', flat=True)
+
+        task_dates = set(month_tasks)
+
+        cal = calendar.monthcalendar(year, month)
+        calendar_days = []
+
+        for week in cal:
+            for day_num in week:
+                if day_num == 0:
+                    calendar_days.append({'date': None})
+                else:
+                    d = date(year, month, day_num)
+                    calendar_days.append({
+                        'date': d,
+                        'day': day_num,
+                        'is_today': d == today,
+                        'is_selected': d == selected_date,
+                        'has_tasks': d in task_dates,
+                        'other_month': False 
+                    })
+
+        context.update({
+            'year': year,
+            'month': month,
+            'month_name': month_name,       
+            'prev_month': prev_month,       
+            'prev_year': prev_year,         
+            'next_month': next_month,       
+            'next_year': next_year,         
+            'day_names': day_names,         
+            'calendar_days': calendar_days,
+            'selected_day_tasks': selected_day_tasks,
+            'selected_date': selected_date, 
+        })
+
+        return context

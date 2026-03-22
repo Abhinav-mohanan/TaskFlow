@@ -92,7 +92,7 @@
     <div class="bg-white border border-black/5 rounded-[14px] p-5 lg:p-6">
       <div class="flex items-center justify-between mb-4">
         <h3 class="text-[15px] font-medium">Upcoming</h3>
-        <a href="" class="text-xs text-[#9a9a8e] hover:underline">Calendar &rarr;</a>
+        <a href="{% url 'task_calendar' %}" class="text-xs text-[#9a9a8e] hover:underline">Calendar &rarr;</a>
       </div>
 
       {% if upcoming_tasks %}

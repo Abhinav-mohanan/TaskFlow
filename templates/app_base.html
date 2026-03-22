@@ -68,8 +68,18 @@
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" 
             d="M9 5h11M9 12h11M9 19h11M5 5l1.5 1.5L9 4M5 12l1.5 1.5L9 11M5 19l1.5 1.5L9 18"/>
         </svg>
-
         <span class="hidden md:inline">My Tasks</span>
+      </a>
+     <a href="{% url 'task_calendar' %}" 
+        class="flex items-center gap-2.5 px-5 py-2.5 text-[13.5px] text-[#9a9a8e] rounded-lg mx-2.5 my-0.5 transition-colors hover:bg-white/5 hover:text-[#f5f4f0] {% block nav_calendar %}{% endblock %}">
+        
+        <!-- Calendar Icon -->
+        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
+            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+        </svg>
+
+        <span class="hidden md:inline">Calendar</span>
       </a>
       </nav>
 
