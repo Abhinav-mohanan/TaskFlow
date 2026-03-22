@@ -1,0 +1,118 @@
+{% extends "app_base.html" %}
+
+{% block title %}Dashboard — TaskFlow{% endblock %}
+{% block nav_dashboard %}bg-white/10 text-[#f5f4f0] font-medium{% endblock %}
+
+{% block content %}
+<div class="px-6 py-8 md:px-9 md:py-8">
+
+  <div class="flex items-center justify-between mb-7">
+    <div>
+      <h2 class="font-serif text-[28px] leading-tight">Dashboard</h2>
+      <p class="text-[13px] text-[#9a9a8e] mt-0.5">{{ today|date:"l, F j, Y" }}</p>
+    </div>
+    <a href="" class="bg-[#1a1a18] text-[#f5f4f0] px-4 py-2.5 rounded-xl text-[13px] font-medium inline-flex items-center gap-1.5 transition-opacity hover:opacity-90">
+      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+      New Task
+    </a>
+  </div>
+
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-3.5 mb-6">
+    <div class="bg-white border border-black/5 rounded-[14px] p-5">
+      <p class="text-[11.5px] text-[#9a9a8e] uppercase tracking-wider mb-2">Total Tasks</p>
+      <p class="text-[28px] font-medium leading-none">{{ total_tasks }}</p>
+      <div class="h-1.5 bg-[#f1f0ec] rounded-full overflow-hidden mt-3">
+        <div class="h-full bg-[#1a1a18] rounded-full w-full"></div>
+      </div>
+    </div>
+
+    <div class="bg-white border border-black/5 rounded-[14px] p-5">
+      <p class="text-[11.5px] text-[#9a9a8e] uppercase tracking-wider mb-2">Completed</p>
+      <p class="text-[28px] font-medium text-[#276749] leading-none">{{ completed_tasks }}</p>
+      <div class="h-1.5 bg-[#f1f0ec] rounded-full overflow-hidden mt-3">
+      </div>
+    </div>
+
+    <div class="bg-white border border-black/5 rounded-[14px] p-5">
+      <p class="text-[11.5px] text-[#9a9a8e] uppercase tracking-wider mb-2">In Progress</p>
+      <p class="text-[28px] font-medium text-[#1d4ed8] leading-none">{{ inprogress_tasks }}</p>
+      <div class="h-1.5 bg-[#f1f0ec] rounded-full overflow-hidden mt-3">
+      </div>
+    </div>
+
+    <div class="bg-white border border-black/5 rounded-[14px] p-5">
+      <p class="text-[11.5px] text-[#9a9a8e] uppercase tracking-wider mb-2">Scheduled</p>
+      <p class="text-[28px] font-medium text-[#c27803] leading-none">{{ scheduled_tasks }}</p>
+      <div class="h-1.5 bg-[#f1f0ec] rounded-full overflow-hidden mt-3">
+      </div>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-4.5">
+
+    <div class="bg-white border border-black/5 rounded-[14px] p-5 lg:p-6">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-[15px] font-medium">Today's Tasks</h3>
+        <a href="{% url 'task_list' %}" class="text-xs text-[#9a9a8e] hover:underline">View all &rarr;</a>
+      </div>
+
+      {% if today_tasks %}
+        <div class="flex flex-col">
+          {% for task in today_tasks %}
+            <div class="group flex items-center gap-3 py-3.5 border-b border-black/5 last:border-0">
+              <form method="POST" action="" class="contents">
+                {% csrf_token %}
+                <button type="submit" class="w-[18px] h-[18px] rounded-[5px] border-[1.5px] flex items-center justify-center shrink-0 transition-colors focus:outline-none focus:ring-2 focus:ring-[#1a1a18]/20
+                  {% if task.status == 'done' %} border-[#1a1a18] bg-[#1a1a18] {% else %} border-[#d1d0c8] bg-transparent hover:border-[#1a1a18]/50 {% endif %}">
+                  {% if task.status == 'done' %}
+                    <svg class="w-2.5 h-2.5 text-[#f5f4f0]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                  {% endif %}
+                </button>
+              </form>
+              
+              <div class="flex-1 min-w-0">
+                <p class="text-[13.5px] font-medium truncate transition-colors {% if task.status == 'done' %} line-through text-[#9a9a8e] {% else %} text-[#1a1a18] {% endif %}">
+                  {{ task.title }}
+                </p>
+                {% if task.due_time %}
+                  <p class="text-[11.5px] text-[#9a9a8e] mt-0.5">{{ task.due_time|time:"g:i A" }}</p>
+                {% endif %}
+              </div>
+              
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="text-[13px] text-[#9a9a8e] text-center py-7">
+          No tasks for today. <a href="{% url 'task_create'%}" class="underline hover:text-[#1a1a18]">Create one?</a>
+        </p>
+      {% endif %}
+    </div>
+
+    <div class="bg-white border border-black/5 rounded-[14px] p-5 lg:p-6">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-[15px] font-medium">Upcoming</h3>
+        <a href="" class="text-xs text-[#9a9a8e] hover:underline">Calendar &rarr;</a>
+      </div>
+
+      {% if upcoming_tasks %}
+        <div class="flex flex-col">
+          {% for task in upcoming_tasks %}
+            <div class="py-2.5 border-b border-black/5 last:border-0">
+              <div class="flex items-center justify-between gap-2">
+                <p class="text-[13px] font-medium truncate flex-1">{{ task.title }}</p>
+              </div>
+              <p class="text-[11.5px] text-[#9a9a8e] mt-1">
+                {{ task.due_date|date:"M j" }}{% if task.due_time %} &middot; {{ task.due_time|time:"g:i A" }}{% endif %}
+              </p>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="text-[13px] text-[#9a9a8e] text-center py-7">No upcoming tasks.</p>
+      {% endif %}
+    </div>
+
+  </div>
+</div>
+{% endblock %}

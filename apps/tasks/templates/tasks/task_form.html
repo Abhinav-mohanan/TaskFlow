@@ -1,0 +1,102 @@
+{% extends "app_base.html" %}
+
+{% block title %}{% if task %}Edit Task{% else %}Create Task{% endif %} — TaskFlow{% endblock %}
+
+{% block nav_create %}{% if not task %}bg-white/10 text-[#f5f4f0] font-medium{% endif %}{% endblock %}
+
+{% block content %}
+<div class="px-6 py-8 md:px-9 md:py-8">
+
+  <div class="mb-7">
+    <h2 class="font-serif text-[28px] leading-tight">{% if task %}Edit Task{% else %}Create Task{% endif %}</h2>
+    <p class="text-[13px] text-[#9a9a8e] mt-0.5">{% if task %}Update task details{% else %}Add a new task to your list{% endif %}</p>
+  </div>
+
+  <div class="bg-white border border-black/5 rounded-[14px] max-w-[680px] p-6 md:p-8">
+    <form method="POST" action="" class="flex flex-col gap-5">
+      {% csrf_token %}
+
+      <div>
+        <label class="block text-[11.5px] font-medium text-[#6b6b60] uppercase tracking-wider mb-1.5" for="id_title">Task Title</label>
+        <input class="w-full bg-[#f9f9f7] border border-[#e0dfd8] rounded-[10px] px-3.5 py-2.5 text-[14px] text-[#1a1a18] outline-none transition-colors focus:border-[#1a1a18] focus:bg-white" 
+               type="text" id="id_title" name="title" value="{{ form.title.value|default:'' }}" placeholder="e.g. Review design mockups" required />
+        {% if form.title.errors %}<p class="text-[12px] text-[#c0392b] mt-1.5">{{ form.title.errors.0 }}</p>{% endif %}
+      </div>
+
+      <div>
+        <label class="block text-[11.5px] font-medium text-[#6b6b60] uppercase tracking-wider mb-1.5" for="id_description">Description</label>
+        <textarea class="w-full bg-[#f9f9f7] border border-[#e0dfd8] rounded-[10px] px-3.5 py-2.5 text-[14px] text-[#1a1a18] outline-none transition-colors focus:border-[#1a1a18] focus:bg-white min-h-[100px] resize-y" 
+                  id="id_description" name="description" placeholder="Add details about this task...">{{ form.description.value|default:'' }}</textarea>
+        {% if form.description.errors %}<p class="text-[12px] text-[#c0392b] mt-1.5">{{ form.description.errors.0 }}</p>{% endif %}
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-[11.5px] font-medium text-[#6b6b60] uppercase tracking-wider mb-1.5" for="id_priority">Priority</label>
+          <div class="relative">
+            <select class="w-full bg-[#f9f9f7] border border-[#e0dfd8] rounded-[10px] px-3.5 py-2.5 text-[14px] text-[#1a1a18] outline-none transition-colors focus:border-[#1a1a18] focus:bg-white appearance-none cursor-pointer" 
+                    id="id_priority" name="priority">
+              <option value="low" {% if form.priority.value == 'low' %}selected{% endif %}>Low</option>
+              <option value="medium" {% if form.priority.value == 'medium' or not form.priority.value %}selected{% endif %}>Medium</option>
+              <option value="high" {% if form.priority.value == 'high' %}selected{% endif %}>High</option>
+            </select>
+            <svg class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none w-3.5 h-3.5 text-[#9a9a8e]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+          </div>
+        </div>
+        <div>
+          <label class="block text-[11.5px] font-medium text-[#6b6b60] uppercase tracking-wider mb-1.5" for="id_status">Status</label>
+          <div class="relative">
+            <select class="w-full bg-[#f9f9f7] border border-[#e0dfd8] rounded-[10px] px-3.5 py-2.5 text-[14px] text-[#1a1a18] outline-none transition-colors focus:border-[#1a1a18] focus:bg-white appearance-none cursor-pointer" 
+                    id="id_status" name="status">
+              <option value="todo" {% if form.status.value == 'todo' or not form.status.value %}selected{% endif %}>To Do</option>
+              <option value="progress" {% if form.status.value == 'progress' %}selected{% endif %}>In Progress</option>
+              <option value="done" {% if form.status.value == 'done' %}selected{% endif %}>Done</option>
+            </select>
+            <svg class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none w-3.5 h-3.5 text-[#9a9a8e]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-[11.5px] font-medium text-[#6b6b60] uppercase tracking-wider mb-1.5" for="id_due_date">Due Date</label>
+          <input class="w-full bg-[#f9f9f7] border border-[#e0dfd8] rounded-[10px] px-3.5 py-2.5 text-[14px] text-[#1a1a18] outline-none transition-colors focus:border-[#1a1a18] focus:bg-white" 
+                 type="date" id="id_due_date" name="due_date" value="{{ form.due_date.value|default:'' }}" />
+          {% if form.due_date.errors %}<p class="text-[12px] text-[#c0392b] mt-1.5">{{ form.due_date.errors.0 }}</p>{% endif %}
+        </div>
+        <div>
+          <label class="block text-[11.5px] font-medium text-[#6b6b60] uppercase tracking-wider mb-1.5" for="id_due_time">Due Time</label>
+          <input class="w-full bg-[#f9f9f7] border border-[#e0dfd8] rounded-[10px] px-3.5 py-2.5 text-[14px] text-[#1a1a18] outline-none transition-colors focus:border-[#1a1a18] focus:bg-white" 
+                 type="time" id="id_due_time" name="due_time" value="{{ form.due_time.value|default:'' }}" />
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-[11.5px] font-medium text-[#6b6b60] uppercase tracking-wider mb-1.5" for="id_category">Category</label>
+        <div class="relative">
+          <select class="w-full bg-[#f9f9f7] border border-[#e0dfd8] rounded-[10px] px-3.5 py-2.5 text-[14px] text-[#1a1a18] outline-none transition-colors focus:border-[#1a1a18] focus:bg-white appearance-none cursor-pointer" 
+                  id="id_category" name="category">
+            <option value="" {% if not form.category.value %}selected{% endif %}>No category</option>
+            <option value="work" {% if form.category.value == 'work' %}selected{% endif %}>Work</option>
+            <option value="personal" {% if form.category.value == 'personal' %}selected{% endif %}>Personal</option>
+            <option value="health" {% if form.category.value == 'health' %}selected{% endif %}>Health</option>
+            <option value="learning" {% if form.category.value == 'learning' %}selected{% endif %}>Learning</option>
+            <option value="finance" {% if form.category.value == 'finance' %}selected{% endif %}>Finance</option>
+          </select>
+          <svg class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none w-3.5 h-3.5 text-[#9a9a8e]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3 mt-2">
+        <button type="submit" class="bg-[#1a1a18] text-[#f5f4f0] rounded-[10px] px-6 py-2.5 text-[13.5px] font-medium inline-flex items-center gap-2 transition-opacity hover:opacity-90">
+          <span class="btn-text">{% if task %}Update Task{% else %}Save Task{% endif %}</span>
+          <span class="btn-spinner hidden w-[15px] h-[15px] border-2 border-white/35 border-t-white rounded-full animate-spin"></span>
+        </button>
+        <a href="" class="bg-transparent text-[#6b6b60] border border-[#e0dfd8] rounded-[10px] px-5 py-2.5 text-[13.5px] font-medium hover:bg-black/5 transition-colors">Cancel</a>
+      </div>
+
+    </form>
+  </div>
+
+</div>
+{% endblock %}

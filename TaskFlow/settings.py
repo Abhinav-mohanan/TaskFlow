@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'django_mongodb_backend',
 
     'apps.authentication',
+    'apps.tasks',
     
 ]
 
@@ -145,3 +146,7 @@ EMAIL_USE_TLS = True
 EMAIL_PORT = 587
 EMAIL_HOST_USER = env('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
+
+LOGIN_URL = 'login'
+LOGIN_REDIRECT_URL = 'dashboard'
+LOGOUT_REDIRECT_URL = 'login' 

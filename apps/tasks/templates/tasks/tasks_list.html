@@ -1,0 +1,115 @@
+{% extends "app_base.html" %}
+
+{% block title %}My Tasks — TaskFlow{% endblock %}
+{% block nav_tasks %}bg-white/10 text-[#f5f4f0] font-medium{% endblock %}
+
+{% block content %}
+<div class="px-6 py-8 md:px-9 md:py-8">
+
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+    <div>
+      <h2 class="font-serif text-[28px] leading-tight">My Tasks</h2>
+      <p class="text-[13px] text-[#9a9a8e] mt-0.5">{{ tasks.count }} task{{ tasks.count|pluralize }}</p>
+    </div>
+    <div class="flex items-center gap-2">
+      <form method="GET" class="contents">
+        <input
+          class="w-[180px] sm:w-[200px] bg-[#f9f9f7] border border-[#e0dfd8] rounded-[10px] px-3.5 py-2 text-[13px] text-[#1a1a18] outline-none transition-colors focus:border-[#1a1a18] focus:bg-white"
+          type="text"
+          name="q"
+          value="{{ request.GET.q }}"
+          placeholder="Search tasks…"
+        />
+      </form>
+      <a href="{% url 'task_create' %}" class="bg-[#1a1a18] text-[#f5f4f0] rounded-[10px] px-4 py-2 text-[13px] font-medium whitespace-nowrap transition-opacity hover:opacity-90">
+        + New
+      </a>
+    </div>
+  </div>
+
+  <div class="flex flex-wrap gap-1.5 mb-5">
+    {% for label, value in filters %}
+      <a href="?filter={{ value }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}"
+         class="px-3.5 py-1.5 rounded-full text-[12.5px] transition-all duration-150 
+         {% if active_filter == value %} bg-[#1a1a18] text-white font-medium {% else %} text-[#6b6b60] hover:bg-black/5 {% endif %}">
+        {{ label }}
+      </a>
+    {% endfor %}
+  </div>
+
+  <div class="bg-white border border-black/5 rounded-[14px] px-6 py-1.5">
+    {% if tasks %}
+      <div class="flex flex-col">
+        {% for task in tasks %}
+          <div class="group flex items-start sm:items-center gap-3 py-3.5 border-b border-black/5 last:border-0">
+
+            <form method="POST" action="{% url 'task_toggle' task.pk %}" class="contents">
+              {% csrf_token %}
+              <button type="submit"
+                class="w-[18px] h-[18px] rounded-[5px] border-[1.5px] shrink-0 flex items-center justify-center transition-colors focus:outline-none focus:ring-2 focus:ring-[#1a1a18]/20 mt-0.5 sm:mt-0
+                {% if task.status == 'done' %} bg-[#1a1a18] border-[#1a1a18] {% else %} bg-transparent border-[#d1d0c8] hover:border-[#1a1a18]/50 {% endif %}">
+                {% if task.status == 'done' %}
+                  <svg class="w-2.5 h-2.5 text-[#f5f4f0]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                {% endif %}
+              </button>
+            </form>
+
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-2 flex-wrap">
+                <p class="text-[13.5px] font-medium transition-colors {% if task.status == 'done' %} line-through text-[#9a9a8e] {% else %} text-[#1a1a18] {% endif %}">
+                  {{ task.title }}
+                </p>
+                
+                {% if task.category %}
+                  <span class="text-[10.5px] px-2 py-0.5 rounded-full capitalize font-medium
+                    {% if task.category == 'work' %} bg-[#dbeafe] text-[#1d4ed8]
+                    {% elif task.category == 'personal' %} bg-[#fce7f3] text-[#9d174d]
+                    {% elif task.category == 'health' %} bg-[#d1fae5] text-[#065f46]
+                    {% elif task.category == 'learning' %} bg-[#fef3c7] text-[#92400e]
+                    {% elif task.category == 'finance' %} bg-[#ede9fe] text-[#5b21b6]
+                    {% else %} bg-[#f1f0ec] text-[#6b6b60] {% endif %}">
+                    {{ task.category }}
+                  </span>
+                {% endif %}
+              </div>
+              
+              {% if task.description %}
+                <p class="text-xs text-[#9a9a8e] mt-1 truncate">{{ task.description }}</p>
+              {% endif %}
+              
+              {% if task.due_date %}
+                <p class="text-[11.5px] text-[#9a9a8e] mt-1">
+                  {{ task.due_date|date:"M j, Y" }}{% if task.due_time %} &middot; {{ task.due_time|time:"g:i A" }}{% endif %}
+                </p>
+              {% endif %}
+            </div>
+
+            <div class="flex gap-1 shrink-0 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+              <a href="{% url 'task_edit' task.pk %}"
+                 class="p-1.5 text-[#9a9a8e] hover:text-[#1a1a18] hover:bg-black/5 rounded-md transition-colors focus:outline-none"
+                 title="Edit">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+              </a>
+              <form method="POST" action="{% url 'task_delete' task.pk %}" onsubmit="return confirm('Delete this task?');" class="contents">
+                {% csrf_token %}
+                <button type="submit"
+                  class="p-1.5 text-[#9a9a8e] hover:text-[#c0392b] hover:bg-[#fef2f2] rounded-md transition-colors focus:outline-none"
+                  title="Delete">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                </button>
+              </form>
+            </div>
+
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="text-center text-[13px] text-[#9a9a8e] py-10">
+        No tasks found.
+        <a href="{% url 'task_create' %}" class="underline hover:text-[#1a1a18] transition-colors">Create your first task</a>
+      </p>
+    {% endif %}
+  </div>
+
+</div>
+{% endblock %}
