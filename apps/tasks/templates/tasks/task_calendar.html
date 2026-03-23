@@ -1,0 +1,109 @@
+{% extends "app_base.html" %}
+
+{% block title %}Calendar — TaskFlow{% endblock %}
+{% block nav_calendar %}bg-white/10 text-[#f5f4f0] font-medium{% endblock %}
+
+{% block content %}
+<div class="px-6 py-8 md:px-9 md:py-8">
+
+  <div class="mb-7">
+    <h2 class="font-serif text-[28px] leading-tight">Calendar</h2>
+    <p class="text-[13px] text-[#9a9a8e] mt-0.5">View your tasks by date</p>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-5 items-start">
+
+    <div class="bg-white border border-black/5 rounded-[14px] p-5 md:p-6">
+
+      <div class="flex items-center justify-between mb-5">
+        <a href="?month={{ prev_month }}&year={{ prev_year }}{% if selected_date %}&date={{ selected_date }}{% endif %}"
+           class="flex items-center justify-center w-8 h-8 rounded-lg border border-[#e0dfd8] text-[#6b6b60] hover:bg-black/5 hover:text-[#1a1a18] transition-colors focus:outline-none">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+        </a>
+        <h3 class="text-[15px] font-medium">{{ month_name }} {{ year }}</h3>
+        <a href="?month={{ next_month }}&year={{ next_year }}{% if selected_date %}&date={{ selected_date }}{% endif %}"
+           class="flex items-center justify-center w-8 h-8 rounded-lg border border-[#e0dfd8] text-[#6b6b60] hover:bg-black/5 hover:text-[#1a1a18] transition-colors focus:outline-none">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+        </a>
+      </div>
+
+      <div class="grid grid-cols-7 mb-2">
+        {% for day_name in day_names %}
+          <div class="text-center text-[11.5px] text-[#9a9a8e] font-medium py-1">{{ day_name }}</div>
+        {% endfor %}
+      </div>
+
+      <div class="grid grid-cols-7 gap-y-1">
+        {% for day in calendar_days %}
+          <div class="text-center py-0.5">
+            {% if day.date %}
+              <a href="?month={{ month }}&year={{ year }}&date={{ day.date|date:'Y-m-d' }}" class="block focus:outline-none">
+                <span class="w-[38px] h-[38px] flex items-center justify-center rounded-full text-[13px] transition-colors relative mx-auto
+                  {% if day.is_today %} bg-[#1a1a18] text-white font-medium
+                  {% elif day.is_selected %} bg-[#e8643c] text-white
+                  {% elif day.other_month %} text-[#c0bfb5] hover:bg-[#f1f0ec]
+                  {% else %} text-[#1a1a18] hover:bg-[#f1f0ec] {% endif %}
+                  
+                  {% if day.has_tasks %} after:content-[''] after:w-1 after:h-1 after:rounded-full after:absolute after:bottom-1 after:left-1/2 after:-translate-x-1/2 
+                    {% if day.is_today or day.is_selected %} after:bg-white/80 {% else %} after:bg-[#e8643c] {% endif %} 
+                  {% endif %}">
+                  {{ day.day }}
+                </span>
+              </a>
+            {% endif %}
+          </div>
+        {% endfor %}
+      </div>
+
+    </div>
+
+    <div class="bg-white border border-black/5 rounded-[14px] p-5 md:p-6 lg:min-h-[400px]">
+      <h3 class="text-[14px] font-medium mb-1">
+        {% if selected_date %}{{ selected_date|date:"F j, Y" }}{% else %}Select a day{% endif %}
+      </h3>
+      <p class="text-xs text-[#9a9a8e] mb-4">
+        {% if selected_day_tasks %}{{ selected_day_tasks|length }} task{{ selected_day_tasks|length|pluralize }}{% elif selected_date %}No tasks{% endif %}
+      </p>
+
+      {% if selected_day_tasks %}
+        <div class="flex flex-col">
+          {% for task in selected_day_tasks %}
+            <div class="group py-2.5 border-b border-black/5 last:border-0">
+              <div class="flex items-center gap-2.5">
+                
+                <form method="POST" action="{% url 'task_toggle' task.pk %}" class="contents">
+                  {% csrf_token %}
+                  <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                  <button type="submit"
+                    class="w-[16px] h-[16px] rounded-[4px] border-[1.5px] shrink-0 flex items-center justify-center transition-colors focus:outline-none focus:ring-2 focus:ring-[#1a1a18]/20
+                    {% if task.status == 'done' %} bg-[#1a1a18] border-[#1a1a18] {% else %} bg-transparent border-[#d1d0c8] hover:border-[#1a1a18]/50 {% endif %}">
+                    {% if task.status == 'done' %}
+                      <svg class="w-2.5 h-2.5 text-[#f5f4f0]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                    {% endif %}
+                  </button>
+                </form>
+
+                <p class="text-[13px] font-medium flex-1 truncate transition-colors {% if task.status == 'done' %} line-through text-[#9a9a8e] {% else %} text-[#1a1a18] {% endif %}">
+                  {{ task.title }}
+                </p>
+
+                <a href="{% url 'task_edit' task.pk %}" class="p-1 text-[#9a9a8e] rounded hover:text-[#1a1a18] hover:bg-black/5 transition-colors opacity-100 lg:opacity-0 lg:group-hover:opacity-100 focus:opacity-100">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                </a>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% elif selected_date %}
+        <p class="text-[13px] text-[#9a9a8e] text-center py-5">No tasks on this day.</p>
+        <div class="text-center">
+          <a href="{% url 'task_create' %}" class="text-[12.5px] text-[#9a9a8e] underline hover:text-[#1a1a18] transition-colors">Add a task</a>
+        </div>
+      {% else %}
+        <p class="text-[13px] text-[#9a9a8e] text-center py-7">Click a day to see tasks</p>
+      {% endif %}
+    </div>
+
+  </div>
+</div>
+{% endblock %}

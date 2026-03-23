@@ -61,7 +61,7 @@ class VerifySignupOTP(View):
 
                 login(request, user)
                 del request.session['signup_email']
-                return redirect('home')
+                return redirect('dashboard')
             else:
                 messages.error(request, "Invalid OTP code. Please try again.")
                 return redirect('verify_signup_otp')
@@ -139,7 +139,7 @@ class LoginView(View):
 
                 if auth_user is not None:
                     login(request, auth_user)
-                    return redirect('home')
+                    return redirect('dashboard')
                 else:
                     messages.error( request, "Incorrect password. Please try again.")
                     return redirect('login')
@@ -189,7 +189,7 @@ class VerifyLoginOTPView(View):
                 otp_record.delete()
                 del request.session['login_email']
                 login(request, user)
-                return redirect('home')
+                return redirect('dashboard')
             else:
                 messages.error(request, "Invalid OTP")
                 return redirect('verify_login_otp')
@@ -199,8 +199,7 @@ class VerifyLoginOTPView(View):
             return redirect('signup')
 
 
-class HomeView(TemplateView):
-    template_name = 'authentication/home.html'
+
                 
                 
 
