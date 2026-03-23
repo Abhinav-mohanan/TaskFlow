@@ -110,7 +110,6 @@ class LoginView(View):
         email = request.POST.get('username')
         password = request.POST.get('password')
         action = request.POST.get('action')
-        print(f'{action=}, {password=}, {email=}')
 
         if not email:
             messages.error(request, "Please enter your email address.")
