@@ -68,6 +68,7 @@
           <label class="block text-[11.5px] font-medium text-[#6b6b60] uppercase tracking-wider mb-1.5" for="id_due_time">Due Time</label>
           <input class="w-full bg-[#f9f9f7] border border-[#e0dfd8] rounded-[10px] px-3.5 py-2.5 text-[14px] text-[#1a1a18] outline-none transition-colors focus:border-[#1a1a18] focus:bg-white" 
                  type="time" id="id_due_time" name="due_time" value="{{ form.instance.due_time|time:'H:i' }}" />
+          {% if form.due_time.errors %}<p class="text-[12px] text-[#c0392b] mt-1.5">{{ form.due_time.errors.0 }}</p>{% endif %}
         </div>
       </div>
 
