@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_mongodb_backend',
+    'anymail',
 
     'apps.authentication',
     'apps.tasks',
@@ -142,12 +143,13 @@ MIGRATION_MODULES = {
     'contenttypes': 'mongo_migrations.contenttypes',
 }
 
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_USE_TLS = True
-EMAIL_PORT = 587
-EMAIL_HOST_USER = env('EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
+EMAIL_BACKEND = 'anymail.backends.brevo.EmailBackend'
+
+ANYMAIL = {
+       "BREVO_API_KEY": os.getenv("BREVO_API_KEY"),
+   }
+
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL')
 
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'dashboard'

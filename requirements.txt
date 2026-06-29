@@ -1,8 +1,14 @@
 asgiref==3.11.1
+certifi==2026.6.17
+charset-normalizer==3.4.7
 Django==6.0.3
+django-anymail==15.0
 django-environ==0.13.0
 django-mongodb-backend==6.0.2
 dnspython==2.8.0
+idna==3.18
 pymongo==4.16.0
+requests==2.34.2
 sqlparse==0.5.5
 tzdata==2025.3
+urllib3==2.7.0
