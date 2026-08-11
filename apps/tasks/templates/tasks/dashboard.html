@@ -11,7 +11,7 @@
       <h2 class="font-serif text-[28px] leading-tight">Dashboard</h2>
       <p class="text-[13px] text-[#9a9a8e] mt-0.5">{{ today|date:"l, F j, Y" }}</p>
     </div>
-    <a href="" class="bg-[#1a1a18] text-[#f5f4f0] px-4 py-2.5 rounded-xl text-[13px] font-medium inline-flex items-center gap-1.5 transition-opacity hover:opacity-90">
+    <a href="{% url 'task_create' %}" class="bg-[#1a1a18] text-[#f5f4f0] px-4 py-2.5 rounded-xl text-[13px] font-medium inline-flex items-center gap-1.5 transition-opacity hover:opacity-90">
       <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
       New Task
     </a>
